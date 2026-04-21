@@ -36,7 +36,7 @@ class SimpleBackend(DownloadBackend):
         loaded_patches.append(patch_id)
         zcube.attrs["loaded_patches"] = loaded_patches
         session.commit(f"Write patch {patch_id}")
-        logger.info(f"Patch {patch_id} written successfully.")
+        logger.info(f"Patch {patch_id} written successfully to {self.repo.storage}")
 
     def submit(self, idx: PatchIndex | list[PatchIndex]):
         """Submit a patch download request to the backend.
@@ -47,7 +47,8 @@ class SimpleBackend(DownloadBackend):
         """
         if isinstance(idx, PatchIndex):
             idx = [idx]
-        for i in idx:
+        for ctr,i in enumerate(idx):
+            logger.info(f"Init download [{ctr:>3}/{len(idx):>3}]: patch {i.id}")
             self._log_event("start_download", i.id)
             patch = self._download_from_source_with_retries(i)
             self._log_event("end_download", i.id)
